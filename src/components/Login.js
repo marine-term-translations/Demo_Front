@@ -8,13 +8,13 @@ const Login = () => {
       if(sessionStorage.getItem("github_token")==="undefined"){
         sessionStorage.clear()
       }
-      navigate('/collection');
+      navigate('/branches');
     }
   }, [navigate]);
   // const REDIRECT_URI = `${process.env.REACT_APP_FRONT_URL}/callback`;
   // console.log(REDIRECT_URI)
   // const AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
-  const AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=write:packages%20write:repo_hook%20read:repo_hook`;
+  const AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=write:packages%20write:repo_hook%20read:repo_hook%20repo`;
 
   return (
     <div>

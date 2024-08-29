@@ -1,125 +1,232 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { parse } from "yaml";
-
 
 const Translate = () => {
     const navigate = useNavigate();
-    const [content, setContent] = useState(null);
+    const [contents, setContents] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [editableLabels, setEditableLabels] = useState({});
-    const [translations, setTranslations] = useState({});
+    const [editableTerm, setEditableTerm] = useState({});
+    const [translations, setTranslations] = useState([]);
+    const [error, setError] = useState(null); // New state for error
 
     useEffect(() => {
-        // console.log(sessionStorage.getItem("github_token"));
         if (!sessionStorage.getItem("github_token")) {
             navigate('/');
         }
         const fetchToken = async () => {
             const params = new URLSearchParams(window.location.search);
-            const path = params.get('path');
-            // console.log(path);
-            if (!(path)) {
-                navigate('/collection');
+            const branch = params.get('branch');
+            if (!branch) {
+                navigate('/branches');
             }
-            sessionStorage.setItem("path", path);
-            // const languageselect = params.get('languageselect');
-            // if (languageselect) {
-            //     sessionStorage.setItem("language", languageselect);
-            // }
+            sessionStorage.setItem("branch", branch);
             try {
-                const response = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/content`, {
+                const response = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/diff`, {
                     params: {
                         repo: process.env.REACT_APP_REPO,
-                        path
+                        branch
                     },
-                        headers: {
+                    headers: {
                         'Authorization': sessionStorage.getItem("github_token")
                     }
                 });
-                const content = parse(response.data);
-                // console.log(content);
-                setContent(content);
+                const contents = response.data;
+                setContents(contents);
                 setLoading(false);
+                setError(null); // Clear error on successful fetch
             } catch (error) {
-                console.error('Erreur lors de l\'obtention du contenu:', error);
+                console.error('Error fetching content:', error);
                 setLoading(false);
+                setError('Failed to fetch content from the server.'); // Set error message
             }
         };
         fetchToken();
     }, [navigate]);
 
     if (loading) {
-        return <div>Chargement...</div>;
+        return <div>Loading...</div>;
     }
     
-    if (!content) {
-        return <div>Erreur lors du chargement du contenu.</div>;
+    if (error) {
+        return <div>Error: {error}</div>; // Display error message
     }
-    const handleEditClick = (labelName) => {
-        setEditableLabels(prev => {
-            const newState = { ...prev, [labelName]: !prev[labelName] };
-            return newState;
-        });
-    };
-    const handleInputChange = (event, labelName) => {
-        const { value } = event.target;
+
+    if (!contents) {
+        return <div>Error loading content.</div>;
+    }
+
+    const transformedData = contents.map(item => {
+        const labels = item.content.labels.reduce((acc, label) => {
+            acc[label.name] = {
+                original: label.original,
+                ...label.translations.reduce((transAcc, translation) => {
+                    Object.keys(translation).forEach(lang => {
+                        transAcc[lang] = translation[lang];
+                    });
+                    return transAcc;
+                }, {})
+            };
+            return acc;
+        }, {});
+    
+        return {
+            filename: item.filename,
+            label: [labels]
+        };
+    });
+
+    const handleEditClick = (filename, labelName, key, term) => {
+        setEditableTerm(prev => ({
+            ...prev,
+            [`${filename}-${labelName}-${key}`]: true
+        }));
+
         setTranslations(prev => ({
             ...prev,
-            [labelName]: value
+            [filename]: {
+                ...(prev[filename] || {}),
+                [labelName]: {
+                    ...(prev[filename]?.[labelName] || {}),
+                    [key]: prev[filename]?.[labelName]?.[key] || term
+                }
+            }
         }));
     };
-    // console.log(content);
-    const language = sessionStorage.getItem("language");
 
-    
+    const handleInputChange = (event, filename, labelName, key) => {
+        const { value } = event.target;
+        
+        setTranslations(prev => ({
+            ...prev,
+            [filename]: {
+                ...(prev[filename] || {}),
+                [labelName]: {
+                    ...(prev[filename]?.[labelName] || {}),
+                    [key]: value
+                }
+            }
+        }));
+    };
+
+    const update = async (filename) => {
+        console.log();
+        if (translations[filename]) {
+            console.log();
+            try {
+                await axios.put(
+                    `${process.env.REACT_APP_BACK_URL}/api/github/update`,
+                    {
+                        repo: process.env.REACT_APP_REPO,
+                        translations,
+                        filename,
+                        branch: sessionStorage.getItem("branch")
+                    },
+                    {
+                        headers: {
+                            'Authorization': sessionStorage.getItem("github_token")
+                        }
+                    }
+                );
+                alert("Update has been made successfully");
+                setError(null); // Clear error on successful update
+            } catch (error) {
+                console.error('Error updating file:', error);
+                setError('Failed to update the file.'); // Set error message
+            }
+        }else{
+            alert(`You don't make a change for ${filename}`);
+            setError(null);
+        }
+    };
 
     return (
         <div>
-            <h1>File's content</h1>
-            <h2><a href={`#/display`}>Go Back</a></h2>
-            <form method="GET" action={`#/update`}>
-                <ul>
-                    {content.labels.length > 0 ? (
-                        content.labels.map(label => {
-                            const translation = label.translations.find(t => t.hasOwnProperty(language));
-                            const translationText = translation ? translation[language] : "";
-                            const isEditable = editableLabels[label.name] || false;
-                            const currentTranslation = translations[label.name] || translationText;
+            <h1>Files' content</h1>
+            <h2><a href={`#/branches`}>Go Back</a></h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Filename</th>
+                        <th>Label Name</th>
+                        <th>Language</th>
+                        <th>Term</th>
+                        <th>Modify</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {transformedData.map((item, index) => {
+                        const labelKeys = Object.keys(item.label[0]);
 
-                            return (
-                                <li key={label.name}>
-                                    <div>
-                                        <label>{label.name} :</label>
-                                        <span>{label.original}</span>
-                                    </div>
-                                    <div>
-                                        <label>Translations ({language}):</label>
-                                        <input
-                                            type="text"
-                                            name={label.name}
-                                            value={currentTranslation}
-                                            disabled={!isEditable}
-                                            onChange={(event) => handleInputChange(event, label.name)}
-                                        />
+                        let firstRowRendered = false;
+                        const totalRowspan = labelKeys.reduce((acc, labelName) => {
+                            return acc + Object.keys(item.label[0][labelName]).length;
+                        }, 0);
+
+                        return (
+                            <>
+                                {labelKeys.map((labelName, labelIndex) => {
+                                    const terms = Object.entries(item.label[0][labelName]);
+
+                                    return terms.map(([key, term], termIndex) => (
+                                        <tr key={`form-row-${index}-${labelIndex}-${termIndex}`}>
+                                            {!firstRowRendered && termIndex === 0 && (
+                                                <>
+                                                    <td rowSpan={totalRowspan}>{item.filename}</td>
+                                                    <td rowSpan={terms.length}>{labelName}</td>
+                                                </>
+                                            )}
+                                            {firstRowRendered && termIndex === 0 && (
+                                                <td rowSpan={terms.length}>{labelName}</td>
+                                            )}
+                                            <td>{key}</td>
+                                            
+                                            {key === 'original' ? (
+                                                <>
+                                                    <td>{term}</td>
+                                                    <td></td>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <td>
+                                                        <textarea 
+                                                            value={translations[item.filename]?.[labelName]?.[key] || term}
+                                                            disabled={!editableTerm[`${item.filename}-${labelName}-${key}`]}
+                                                            onChange={(e) => handleInputChange(e, item.filename, labelName, key)}
+                                                            style={{ width: '99%', minHeight: '50px', resize: 'vertical', fontSize: '16px', fontFamily: 'inherit', lineHeight: '1.5' }}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            onClick={() => handleEditClick(item.filename, labelName, key, term)}
+                                                            disabled={editableTerm[`${item.filename}-${labelName}-${key}`]}
+                                                            style={{ width: '99%', height: '50px'}}
+                                                        >
+                                                            {editableTerm[`${item.filename}-${labelName}-${key}`] ? 'Editing' : 'Edit'}
+                                                        </button>
+                                                    </td>
+                                                </>
+                                            )}
+                                            
+                                            {termIndex === terms.length - 1 && (firstRowRendered = true)}
+                                        </tr>
+                                    ))
+                                })}
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'center' }}>
                                         <button
-                                            type="button"
-                                            onClick={() => handleEditClick(label.name)}
-                                            disabled={isEditable}
+                                            onClick={() => update(item.filename)}
+                                            style={{ width: '100%', height: '50px' }}
                                         >
-                                            {isEditable ? 'New' : 'Edit'}
+                                            Update {item.filename}
                                         </button>
-                                    </div>
-                                </li>
-                            );
-                        })
-                    ) : (
-                        <li>{content}</li>
-                    )}
-                </ul>
-                <button type="submit">Send modify</button>
-            </form>
+                                    </td>
+                                </tr>
+                            </>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
     );
 };
