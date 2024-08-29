@@ -74,7 +74,7 @@ const Branches = () => {
                         const formattedDate = formatInTimeZone(branch.lastCommit, userTimeZone, 'dd/MM/yyyy HH:mm:ss');
                         return (
                             <tr key={branch.name}>
-                                <td><a href={`/${process.env.REACT_APP_REPO}/?branch=${branch.name}#/translate`}>{branch.name}</a></td>
+                                <td><a href={`?branch=${branch.name}#/translate`}>{branch.name}</a></td>
                                 <td>{formattedDate}</td>
                             </tr>
                         );
