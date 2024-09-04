@@ -20,7 +20,7 @@ const Changed = () => {
         if (!sessionStorage.getItem("github_token")) {
             navigate('/');
         }
-        const branch = sessionStorage.getItem("branch")
+        const branch = sessionStorage.getItem("branch");
         if (!branch) {
             navigate('/branches');
         }
@@ -121,7 +121,7 @@ const Changed = () => {
                         <h2>Conflicts</h2>
                         <div key={item.filename}>
                             <h3>{item.filename}</h3>
-                            <table border="1">
+                            <table border={1 } style={{ width: '90vw', height: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr>
                                         <th>Label</th>

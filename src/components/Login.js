@@ -1,25 +1,53 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [gitHubLink, setGitHubLink] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (sessionStorage.getItem("github_token")) {
-      if(sessionStorage.getItem("github_token")==="undefined"){
-        sessionStorage.clear()
-      }
       navigate('/branches');
     }
+    const fetchGitHubLink = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/oauth/link`);
+        const path = window.location.protocol + "//" + window.location.host + window.location.pathname ;
+        console.log(path);
+        const { client_id, scope } = response.data;
+        const AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${client_id}&scope=${scope}&redirect_uri=${path}#callback`;
+        setGitHubLink(AUTH_URL);
+      } catch (error) {
+        if (error.response) {
+          setError(`Error: ${error.response.data.message || 'Server Error'}`);
+        } else if (error.request) {
+          setError('No response from the server. Please check your network.');
+        } else {
+          setError(`Request error: ${error.message}`);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGitHubLink();
   }, [navigate]);
-  // const REDIRECT_URI = `${process.env.REACT_APP_FRONT_URL}/callback`;
-  // console.log(REDIRECT_URI)
-  // const AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
-  const AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.REACT_APP_CLIENT_ID}&scope=write:packages%20write:repo_hook%20read:repo_hook%20repo`;
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div style={{ color: 'red' }}>{error}</div>;
+  }
 
   return (
     <div>
       <h1>Login with GitHub</h1>
-      <a href={AUTH_URL}>Login</a>
+      {gitHubLink ? <a href={gitHubLink}>Login</a> : <p>Failed to load GitHub login link.</p>}
     </div>
   );
 };
