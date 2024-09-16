@@ -11,6 +11,7 @@ const Translate = () => {
     const [config, setConfig] = useState(null);
     const [loading, setLoading] = useState(true);
     const [contents, setContents] = useState(null);
+    const [reloading, setReloading] = useState(false);
     const [modalShow, setModalShow] = useState(false);
     const [editableTerm, setEditableTerm] = useState({});
     const [translations, setTranslations] = useState([]);
@@ -34,41 +35,44 @@ const Translate = () => {
                     console.log(`sessionStorage.setItem('branch', ${branch});`);
                     sessionStorage.setItem("branch", branch);
                     window.location.reload()
+                    setReloading(true);
                 }
             }
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
-            window.history.replaceState(null, '', newUrl);
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/diff`, {
-                    params: {
-                        repo: process.env.REACT_APP_REPO,
-                        branch: sessionStorage.getItem('branch')
-                    },
-                    headers: {
-                        'Authorization': sessionStorage.getItem("github_token")
-                    }
-                });
-                const contents = response.data;
-                setContents(contents);
-
-                const responseConfig = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/content`, {
-                    params: {
-                        repo: process.env.REACT_APP_REPO,
-                        path: "config.yml"
-                    },
-                    headers: {
-                        'Authorization': sessionStorage.getItem("github_token")
-                    }
-                });
-                const content = responseConfig.data;
-                setConfig(content);
-                setSelectedLanguage(content.target_languages[0]);
-                setLoading(false);
-                setError(null);
-            } catch (error) {
-                console.error('Error fetching content:', error);
-                setLoading(false);
-                setError('Failed to fetch content from the server.');
+            if(!reloading){
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + window.location.hash;
+                window.history.replaceState(null, '', newUrl);
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/diff`, {
+                        params: {
+                            repo: process.env.REACT_APP_REPO,
+                            branch: sessionStorage.getItem('branch')
+                        },
+                        headers: {
+                            'Authorization': sessionStorage.getItem("github_token")
+                        }
+                    });
+                    const contents = response.data;
+                    setContents(contents);
+    
+                    const responseConfig = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/content`, {
+                        params: {
+                            repo: process.env.REACT_APP_REPO,
+                            path: "config.yml"
+                        },
+                        headers: {
+                            'Authorization': sessionStorage.getItem("github_token")
+                        }
+                    });
+                    const content = responseConfig.data;
+                    setConfig(content);
+                    setSelectedLanguage(content.target_languages[0]);
+                    setLoading(false);
+                    setError(null);
+                } catch (error) {
+                    console.error('Error fetching content:', error);
+                    setLoading(false);
+                    setError('Failed to fetch content from the server.');
+                }
             }
         };
         fetchToken();
