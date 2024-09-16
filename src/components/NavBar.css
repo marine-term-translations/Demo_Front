@@ -1,0 +1,13 @@
+.custom-navbar {
+    min-width: 80vw;
+}
+
+.navbar-nav .nav-item {
+    margin-left: 10px;
+}
+
+.navbar-nav .nav-link, .navbar-brand {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}

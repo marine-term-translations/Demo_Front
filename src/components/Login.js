@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Container, Card, Button, Spinner, Alert } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,7 +17,7 @@ const Login = () => {
     const fetchGitHubLink = async () => {
       try {
         const response = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/oauth/link`);
-        const path = window.location.protocol + "//" + window.location.host + window.location.pathname ;
+        const path = window.location.protocol + "//" + window.location.host + window.location.pathname;
         console.log(path);
         const { client_id, scope } = response.data;
         const AUTH_URL = `https://github.com/login/oauth/authorize?client_id=${client_id}&scope=${scope}&redirect_uri=${path}#callback`;
@@ -37,18 +39,34 @@ const Login = () => {
   }, [navigate]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '85vh'}}>
+        <Spinner animation="border" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div style={{ color: 'red' }}>{error}</div>;
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '85vh'}}>
+        <Alert variant="danger">{error}</Alert>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Login with GitHub</h1>
-      {gitHubLink ? <a href={gitHubLink}>Login</a> : <p>Failed to load GitHub login link.</p>}
-    </div>
+    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '85vh'}}>
+      <Card className="p-4 rounded-3 shadow" style={{ width: '100%', maxWidth: '400px', minHeight: '50vh' }}>
+        <Card.Body className="d-flex flex-column justify-content-center text-center" >
+          <Card.Title className="mb-4 mt-auto">Login with GitHub</Card.Title>
+          {gitHubLink ? (
+            <Button href={gitHubLink} variant="primary" className="m-auto mt-2 w-50">Login</Button>
+          ) : (
+            <Card.Text>Failed to load GitHub login link.</Card.Text>
+          )}
+        </Card.Body>
+      </Card>
+    </Container>
   );
 };
 
