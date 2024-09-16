@@ -2,7 +2,7 @@
   "name": "translate-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://marine-term-translations.github.io/",
+  "homepage": "https://marine-term-translations.github.io/Demo_Front/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
