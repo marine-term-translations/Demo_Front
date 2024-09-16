@@ -457,7 +457,7 @@ const Changed = () => {
                 <Button
                     variant="primary"
                     onClick={() => merge()}
-                    disabled={Object.keys(emptyField).length !== 0 && !readyToMerge}
+                    disabled={!(Object.keys(emptyField).length === 0 && readyToMerge)}
                 >
                     Merge
                 </Button>
