@@ -5,7 +5,6 @@ import { Container, Table, Button, Form, Spinner, Alert, Row, Col, Modal } from 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Translate = () => {
-    // window.location.reload()
     const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [config, setConfig] = useState(null);
@@ -24,8 +23,6 @@ const Translate = () => {
             const params = new URLSearchParams(window.location.search);
             const branch = params.get('branch');
             const branchExists = sessionStorage.getItem('branch');
-            // console.log(branch);
-            // console.log(branchExists);
             if (!branch && !branchExists) {
                 navigate('/branches');
             }
@@ -33,7 +30,7 @@ const Translate = () => {
                 if(branch){
                     console.log(`sessionStorage.setItem('branch', ${branch});`);
                     sessionStorage.setItem("branch", branch);
-                    window.location.reload()
+                    window.location.reload();
                     setError(null);
                 }
             }

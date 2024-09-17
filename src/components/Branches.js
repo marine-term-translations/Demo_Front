@@ -6,11 +6,11 @@ import { Container, Table, Spinner, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Branches = () => {
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [branches, setBranches] = useState([]);
     const [emptyField, setEmptyField] = useState({});
     const [emptyFieldFile, setEmptyFieldFile] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     const isEmpty = (str) => !str || !/[a-zA-Z0-9]/.test(str);

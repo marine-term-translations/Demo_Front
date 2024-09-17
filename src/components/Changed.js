@@ -10,19 +10,18 @@ const Changed = () => {
     const [diffs, setDiffs] = useState([]);
     const [modal, setModal] = useState(null);
     const [error, setError] = useState(null);
-    const [merged, setMerged] = useState(null);
     const [loading, setLoading] = useState(true);
     const [comments, setComments] = useState([]);
     const [conflicts, setConflicts] = useState([]);
     const [overwrite, setOverwrite] = useState({});
     const [upToDate, setUpToDate] = useState(false);
-    const [pullnumber, setPullnumber] = useState([]);
     const [emptyField, setEmptyField] = useState({});
     const [modalShow, setModalShow] = useState(false);
     const [readyToMerge, setReadyToMerge] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
     const [selectedLine, setSelectedLine] = useState(null);
     const [emptyFieldFile, setEmptyFieldFile] = useState({});
+    const [upToDateMessage, setUpToDateMessage] = useState(false);
     const [showCommentForm, setShowCommentForm] = useState(false);
     const [showDiffSection, setShowDiffSection] = useState(false);
     const navigate = useNavigate();
@@ -100,6 +99,7 @@ const Changed = () => {
 
                 if (response.data.compare) {
                     setUpToDate(true);
+                    setUpToDateMessage(response.data.message);
                 }
                 const { diffsData, commentsData, pullnumber } = response.data;
 
@@ -107,7 +107,6 @@ const Changed = () => {
                 
                 setDiffs(diffsData);
                 setComments(commentsData);
-                setPullnumber(pullnumber);
                 setLoading(false);
                 setError(null);
             } catch (error) {
@@ -128,6 +127,13 @@ const Changed = () => {
         );
     }
 
+    if (upToDate) {
+        return (
+            <div className="d-flex justify-content-center align-items-center min-vh-100">
+                <Alert variant ="success">{upToDateMessage}</Alert>
+            </div>
+        );
+    }
     if (error) {
         return (
             <div className="d-flex justify-content-center align-items-center min-vh-100">
@@ -136,13 +142,6 @@ const Changed = () => {
         );
     }
 
-    if (upToDate) {
-        return (
-            <div className="d-flex justify-content-center align-items-center min-vh-100">
-                <Alert variant ="success">Don't have a Commit</Alert>
-            </div>
-        );
-    }
 
     
     
@@ -163,6 +162,7 @@ const Changed = () => {
                 {
                     repo: process.env.REACT_APP_REPO,
                     branch: sessionStorage.getItem("branch")
+                    
                 },
                 {
                     headers: {
@@ -170,14 +170,12 @@ const Changed = () => {
                     }
                 }
             );
-            setMerged(true);
             setError(null);
-            sessionStorage.geremoveItem("branch")
-            navigate("/branch")
+            sessionStorage.removeItem("branch")
+            window.location.reload();
         }catch(error) {
             console.log('Error during merge :', error)
             setError('Error during merge.');
-            setMerged(false);
         }
         // emptyCounts()
         // console.log("ouiiiiiiiiii")
@@ -327,21 +325,17 @@ const Changed = () => {
     };
 
     const closeModal = async () => {
-        if(merged){
-            navigate('/branches');
-        }else{
-            const responseConflicts = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/conflicts`, {
-                params: {
-                    repo: process.env.REACT_APP_REPO,
-                    branch: sessionStorage.getItem("branch")
-                },
-                headers: {
-                    'Authorization': sessionStorage.getItem("github_token")
-                }
-            });
-            setConflicts(responseConflicts.data);
-            setModalShow(false);
-        }
+        const responseConflicts = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/conflicts`, {
+            params: {
+                repo: process.env.REACT_APP_REPO,
+                branch: sessionStorage.getItem("branch")
+            },
+            headers: {
+                'Authorization': sessionStorage.getItem("github_token")
+            }
+        });
+        setConflicts(responseConflicts.data);
+        setModalShow(false);
     };
 
     // console.log(conflicts);
