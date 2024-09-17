@@ -5,18 +5,20 @@ import './NavBar.css';
 
 const NavBarTranslate = () => {
   const [isBranch, setIsBranch] = useState(false);
+  const [pathToHostSite, setPathToHostSite] = useState(null);
 
   useEffect(() => {
     const branchExists = sessionStorage.getItem('branch');
     if (branchExists) {
       setIsBranch(true);
     }
+    setPathToHostSite(window.location.protocol + "//" + window.location.host);
   }, []);
 
   return (
     <Navbar expand="lg" bg="light" className="custom-navbar w-100">
       <Container>
-        <Navbar.Brand href="#" className="ms-3">Marine_Translate_Term</Navbar.Brand>
+        <Navbar.Brand href={{pathToHostSite}} className="ms-3">Marine_Translate_Term</Navbar.Brand>
         {isBranch && (
           <>
             <Navbar.Toggle aria-controls="navbarNav" className="me-2" />
