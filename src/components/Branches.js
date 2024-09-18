@@ -129,7 +129,7 @@ const Branches = () => {
                                         {emptyFieldCounts ? (
                                             <ul className="list-unstyled m-auto">
                                                 {Object.entries(emptyFieldCounts).map(([lang, count]) => (
-                                                    <li key={lang}>{lang}: {count} to {emptyFieldFileCounts[lang]}</li>
+                                                    <li key={lang}>{lang}: {count} in {emptyFieldFileCounts[lang]}</li>
                                                 ))}
                                             </ul>
                                         ) : (

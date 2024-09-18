@@ -12,13 +12,12 @@ const NavBarTranslate = () => {
     if (branchExists) {
       setIsBranch(true);
     }
-    setPathToHostSite(window.location.protocol + "//" + window.location.host);
+    setPathToHostSite(`${window.location.protocol}//${window.location.host}`);
   }, []);
-
   return (
     <Navbar expand="lg" bg="light" className="custom-navbar w-100">
       <Container>
-        <Navbar.Brand href={{pathToHostSite}} className="ms-3">Marine_Translate_Term</Navbar.Brand>
+        <Navbar.Brand href={pathToHostSite} className="ms-3">Marine_Translate_Term</Navbar.Brand>
         {isBranch && (
           <>
             <Navbar.Toggle aria-controls="navbarNav" className="me-2" />

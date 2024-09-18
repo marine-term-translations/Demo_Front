@@ -365,15 +365,15 @@ const Changed = () => {
                     <tr>
                         <th>Label</th>
                         <th>Language</th>
-                        <th style={{width:'25vw'}} >Sync Value</th>
-                        <th style={{width:'25vw'}}>{sessionStorage.getItem("branch")} Value</th>
+                        <th style={{width:'25vw'}} >Remote Value</th>
+                        <th style={{width:'25vw'}}> Local ({sessionStorage.getItem("branch")}) Value</th>
                         <th>
                             Overwrite Sync Value
                             <br />
                             <Button variant="primary" onClick={() => selectAllColumn('overwrite')}>Select All</Button>
                         </th>
                         <th>
-                            Save Branch Value
+                            Ignore conflict
                             <br />
                             <Button variant="primary" onClick={() => selectAllColumn('save')}>Select All</Button>
                         </th>
@@ -395,7 +395,6 @@ const Changed = () => {
                                             value="overwrite"
                                             checked={overwrite[item.filename]?.[conflict.label]?.[conflict.language] === true}
                                             onChange={() => { radioButton(true, item, conflict) }}
-                                            label="Overwrite Sync Value"
                                         />
                                     </td>
                                     <td>
@@ -405,7 +404,6 @@ const Changed = () => {
                                             value="save"
                                             checked={overwrite[item.filename]?.[conflict.label]?.[conflict.language] === false}
                                             onChange={() => { radioButton(false, item, conflict) }}
-                                            label="Save Branch Value"
                                         />
                                     </td>
                                 </tr>
