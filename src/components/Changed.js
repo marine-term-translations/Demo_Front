@@ -368,7 +368,7 @@ const Changed = () => {
                         <th style={{width:'25vw'}} >Remote Value</th>
                         <th style={{width:'25vw'}}> Local ({sessionStorage.getItem("branch")}) Value</th>
                         <th>
-                            Overwrite Sync Value
+                            Choose remote value
                             <br />
                             <Button variant="primary" onClick={() => selectAllColumn('overwrite')}>Select All</Button>
                         </th>
