@@ -101,7 +101,7 @@ const Changed = () => {
                     setUpToDate(true);
                     setUpToDateMessage(response.data.message);
                 }
-                const { diffsData, commentsData, pullnumber } = response.data;
+                const { diffsData, commentsData } = response.data;
 
                 emptyCounts();
                 

@@ -15,7 +15,7 @@ const NavBarTranslate = () => {
     setPathToHostSite(`${window.location.protocol}//${window.location.host}`);
   }, []);
   return (
-    <Navbar expand="lg" bg="light" className="custom-navbar w-100">
+    <Navbar expand="lg" bg="light" className="custom-navbar w-100" sticky="top">
       <Container>
         <Navbar.Brand href={pathToHostSite} className="ms-3">Marine_Translate_Term</Navbar.Brand>
         {isBranch && (

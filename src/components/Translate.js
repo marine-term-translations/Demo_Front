@@ -286,14 +286,13 @@ const Translate = () => {
     
     return (
         <div>
-            <h1>File Contents</h1>
-            <Button variant="link" href="#/branches"><h2>Go Back</h2> </Button>
+            <h1>Translate Files</h1>
             <Container className="mt-4">
                 <Table bordered responsive="lg" className="text-center m-auto" style={{width:'auto'}}>
                     <thead>
                         <tr>
                             <th><pre>       </pre></th>
-                            <th>Field</th>
+                            <th>Label</th>
                             <th>Original</th>
                             <th>
                                 <Form.Group as={Row} className="align-items-center" controlId="languageselect">

@@ -11,6 +11,7 @@ const Branches = () => {
     const [branches, setBranches] = useState([]);
     const [emptyField, setEmptyField] = useState({});
     const [emptyFieldFile, setEmptyFieldFile] = useState({});
+    const [totalFileCounts, setTotalFileCounts] = useState({});
     const navigate = useNavigate();
 
     const isEmpty = (str) => !str || !/[a-zA-Z0-9]/.test(str);
@@ -39,6 +40,7 @@ const Branches = () => {
 
                 const emptyFields = {};
                 const emptyFieldsFile = {};
+                const totalFileCounts = {};
                 await Promise.all(branchesData.map(async (branchData) => {
                     const branch = branchData.name;
                     const response = await axios.get(`${process.env.REACT_APP_BACK_URL}/api/github/diff`, {
@@ -49,9 +51,11 @@ const Branches = () => {
                     const contents = response.data;
                     const translationCounts = {};
                     const fileCounts = {};
+                    totalFileCounts[branch] = 0;
 
                     contents.forEach(file => {
                         const firstInFile = {};
+                        totalFileCounts[branch]++;
 
                         file.content.labels.forEach(label => {
                             label.translations.forEach(translation => {
@@ -79,6 +83,7 @@ const Branches = () => {
                 }));
                 setEmptyField(emptyFields);
                 setEmptyFieldFile(emptyFieldsFile);
+                setTotalFileCounts(totalFileCounts);
                 setLoading(false);
                 setError(null);
             } catch (error) {
@@ -113,7 +118,9 @@ const Branches = () => {
                         <tr>
                             <th>Branch Name</th>
                             <th>Last Commit</th>
-                            <th>Empty Fields on Files</th>
+                            <th>empty field</th>
+                            <th>files whith empty field</th>
+                            <th>files</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -125,17 +132,39 @@ const Branches = () => {
                                 <tr key={branch.name}>
                                     <td><a href={`?branch=${branch.name}#/translate`}>{branch.name}</a></td>
                                     <td>{formattedDate}</td>
-                                    <td>
-                                        {emptyFieldCounts ? (
-                                            <ul className="list-unstyled m-auto">
-                                                {Object.entries(emptyFieldCounts).map(([lang, count]) => (
-                                                    <li key={lang}>{lang}: {count} in {emptyFieldFileCounts[lang]}</li>
-                                                ))}
-                                            </ul>
-                                        ) : (
-                                            'No data'
-                                        )}
-                                    </td>
+                                    {emptyFieldCounts ? (
+                                        <>
+                                            <td>
+                                                <ul className="list-unstyled m-auto">
+                                                    {Object.entries(emptyFieldCounts).map(([lang, count]) => (
+                                                        <li key={lang}>{lang}: {count} field(s)</li>
+                                                    ))}
+                                                </ul>
+                                            </td>
+                                            <td>
+                                                <ul className="list-unstyled m-auto">
+                                                    {Object.entries(emptyFieldCounts).map(([lang, count]) => (
+                                                        <li key={lang}>{lang}: {emptyFieldFileCounts[lang]} file(s)</li>
+                                                    ))}
+                                                </ul>
+                                            </td>
+                                            <td>
+                                                {totalFileCounts[branch.name]}
+                                            </td>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <td>
+                                                'No data'
+                                            </td>
+                                            <td>
+                                                'No data'
+                                            </td>
+                                            <td>
+                                                'No data'
+                                            </td>
+                                        </>
+                                    )}
                                 </tr>
                             );
                         })}
