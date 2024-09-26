@@ -28,7 +28,6 @@ const Changed = () => {
 
     const isEmpty = (str) => {
         return !str || !/[a-zA-Z0-9]/.test(str);
-        // return false;
     };
 
     const emptyCounts = async () =>{
@@ -178,7 +177,6 @@ const Changed = () => {
             setError('Error during merge.');
         }
         // emptyCounts()
-        // console.log("ouiiiiiiiiii")
     };
 
     const overwritefun = async () => {

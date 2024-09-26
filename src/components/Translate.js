@@ -190,7 +190,6 @@ const Translate = () => {
                         }
                     });
                     setContents(response.data);
-                    // alert("Update has been made successfully");
                     setModalShow(false)
                 }
                 setError(null);
@@ -228,7 +227,6 @@ const Translate = () => {
                     }
                 });
                 setContents(response.data);
-                // alert(`Successfully updated ${modifiedFiles.length} file(s)`);
                 setError(null);
                 setModalShow(false)
             } else {
